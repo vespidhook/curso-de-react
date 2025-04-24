@@ -55,11 +55,15 @@ function App() {
       <div className="w-[500px] space-y-4">
         <Title>Gerenciador de Tarefas</Title>
         <AddTask onAddTaskSubmit={onAddTaskSubmit} />
-        <Tasks
-          tasks={tasks}
-          onTaskClick={onTaskClick}
-          onDeleteTaskClick={onDeleteTaskClick}
-        />
+        {tasks.length > 0 ? (
+          <Tasks
+            tasks={tasks}
+            onTaskClick={onTaskClick}
+            onDeleteTaskClick={onDeleteTaskClick}
+          />
+        ) : (
+          <p className="text-center">Não há tarefas disponíveis </p>
+        )}
       </div>
     </div>
   );
