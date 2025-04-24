@@ -1,53 +1,66 @@
 import { useEffect, useState } from "react";
 import AddTask from "./components/AddTask";
 import Tasks from "./components/Tasks";
-import { v4 } from "uuid";
 import Title from "./components/Title";
 
+const API_URL = "https://apigerenciadordetarefas.brunoalves.dev.br/api/tasks";
+
 function App() {
-  const [tasks, setTasks] = useState(
-    JSON.parse(localStorage.getItem("tasks")) || []
-  );
+  const [tasks, setTasks] = useState([]);
+
+  function normalizeTask(task) {
+    return {
+      ...task,
+      isCompleted: !!task.is_completed,
+    };
+  }
 
   useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
+    const fetchTasks = async () => {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      const formatted = data.map(normalizeTask);
+      setTasks(formatted);
+    };
 
-  useEffect(() => {
-    // const fetchTasks = async () => {
-    //   const response = await fetch(
-    //     "https://jsonplaceholder.typicode.com/todos?_limit=10",
-    //     { method: "GET" }
-    //   );
-    //   const data = await response.json();
-    //   setTasks(data);
-    // };
-    // fetchTasks();
+    fetchTasks();
   }, []);
 
-  function onTaskClick(taskId) {
-    const newTasks = tasks.map((task) => {
-      if (task.id === taskId) {
-        return { ...task, isCompleted: !task.isCompleted };
-      }
-      return task;
+  async function onTaskClick(taskId) {
+    const task = tasks.find((t) => t.id === taskId);
+
+    const response = await fetch(`${API_URL}/${taskId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        is_completed: !task.isCompleted,
+      }),
     });
-    setTasks(newTasks);
+
+    const updated = await response.json();
+    const normalized = normalizeTask(updated);
+
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? normalized : t)));
   }
 
-  function onDeleteTaskClick(taskId) {
-    const newTasks = tasks.filter((task) => task.id !== taskId);
-    setTasks(newTasks);
+  async function onDeleteTaskClick(taskId) {
+    await fetch(`${API_URL}/${taskId}`, {
+      method: "DELETE",
+    });
+
+    setTasks((prev) => prev.filter((task) => task.id !== taskId));
   }
 
-  function onAddTaskSubmit(title, description) {
-    const newTask = {
-      id: v4(),
-      title,
-      description,
-      isCompleted: false,
-    };
-    setTasks([...tasks, newTask]);
+  async function onAddTaskSubmit(title, description) {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, description }),
+    });
+
+    const newTask = await response.json();
+    const normalized = normalizeTask(newTask);
+    setTasks((prev) => [...prev, normalized]);
   }
 
   return (
@@ -62,7 +75,7 @@ function App() {
             onDeleteTaskClick={onDeleteTaskClick}
           />
         ) : (
-          <p className="text-center">Não há tarefas disponíveis </p>
+          <p className="text-center text-white">Não há tarefas disponíveis</p>
         )}
       </div>
     </div>
