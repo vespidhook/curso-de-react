@@ -10,21 +10,12 @@ function TaskPage() {
   const [task, setTask] = useState(null);
 
   useEffect(() => {
-    if (!id) return;
-
     const fetchTask = async () => {
       try {
         const data = await apiRequest(`/tasks/${id}`);
         setTask(data);
       } catch (err) {
-        console.error("Erro ao carregar tarefa", err.message);
-
-        if (err.message === "Acesso não autorizado.") {
-          alert("Você não tem permissão para acessar esta tarefa.");
-        } else {
-          alert("Erro ao carregar tarefa.");
-        }
-
+        console.error("Erro ao carregar tarefa", err);
         navigate("/");
       }
     };
