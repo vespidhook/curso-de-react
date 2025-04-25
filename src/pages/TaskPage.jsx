@@ -8,31 +8,30 @@ function TaskPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [task, setTask] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!id) return;
 
     const fetchTask = async () => {
       try {
+        setLoading(true);
         const data = await apiRequest(`/tasks/${id}`);
         setTask(data);
       } catch (err) {
         console.error("Erro ao carregar tarefa", err);
-        navigate("/");
+        setError("Tarefa não encontrada ou acesso não autorizado.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchTask();
-  }, [id, navigate]);
-
-  if (!task) {
-    return (
-      <div className="text-white text-center mt-20">Carregando tarefa...</div>
-    );
-  }
+  }, [id]);
 
   return (
-    <div className="w-screen h-screen bg-slate-500 flex justify-center p-6">
+    <div className="w-screen h-screen bg-slate-500 flex justify-center items-center p-6">
       <div className="w-[500px] space-y-4">
         <div className="flex justify-center relative mb-6">
           <button
@@ -43,10 +42,21 @@ function TaskPage() {
           </button>
           <Title>Detalhes da Tarefa</Title>
         </div>
-        <div className="bg-slate-200 p-4 rounded-md shadow">
-          <h2 className="text-xl text-slate-600 font-bold">{task.title}</h2>
-          <p className="text-slate-600">{task.description}</p>
-        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center mt-10">
+            <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : error ? (
+          <div className="text-center text-white bg-red-500 p-4 rounded-md shadow">
+            {error}
+          </div>
+        ) : (
+          <div className="bg-slate-200 p-4 rounded-md shadow">
+            <h2 className="text-xl text-slate-600 font-bold">{task.title}</h2>
+            <p className="text-slate-600">{task.description}</p>
+          </div>
+        )}
       </div>
     </div>
   );
