@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../components/Input";
 import Title from "../components/Title";
+import { apiRequest } from "../services/api";
 
 function RegisterPage() {
   const [name, setName] = useState("");
@@ -12,28 +13,12 @@ function RegisterPage() {
   async function handleRegister(e) {
     e.preventDefault();
     try {
-      const response = await fetch(
-        "https://apigerenciadordetarefas.brunoalves.dev.br/api/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name, email, password }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.message || "Erro ao registrar");
-        return;
-      }
-
+      await apiRequest("/register", "POST", { name, email, password });
       alert("Usuário registrado com sucesso! Faça login.");
       navigate("/login");
     } catch (error) {
-      console.error(error);
-      alert("Erro na requisição");
+      console.error("Erro na requisição:", error.message);
+      alert(error.message);
     }
   }
 
@@ -41,7 +26,6 @@ function RegisterPage() {
     <div className="w-screen h-screen bg-slate-500 flex justify-center p-6">
       <div className="w-[500px] space-y-4">
         <Title>Cadastro</Title>
-
         <form
           onSubmit={handleRegister}
           className="space-y-4 p-6 bg-slate-200 rounded-md shadow flex flex-col"
@@ -71,7 +55,6 @@ function RegisterPage() {
             Registrar
           </button>
         </form>
-
         <p
           className="text-center text-white text-sm underline cursor-pointer"
           onClick={() => navigate("/login")}

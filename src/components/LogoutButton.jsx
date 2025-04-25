@@ -1,23 +1,14 @@
 import { useNavigate } from "react-router-dom";
+import { apiRequest } from "../services/api";
 
 function LogoutButton() {
   const navigate = useNavigate();
 
   async function handleLogout() {
-    const token = localStorage.getItem("token");
-
     try {
-      await fetch(
-        "https://apigerenciadordetarefas.brunoalves.dev.br/api/logout",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await apiRequest("/logout", "POST");
     } catch (err) {
-      console.error("Erro ao fazer logout:", err);
+      console.error("Erro ao fazer logout:", err.message);
     }
 
     localStorage.removeItem("token");

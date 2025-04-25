@@ -13,23 +13,8 @@ export async function apiRequest(endpoint, method = "GET", body = null) {
   });
 
   if (!res.ok) {
-    let message = "Erro na requisição";
-
-    try {
-      const errorData = await res.json();
-      if (res.status === 401) {
-        message = "Não autenticado. Faça login novamente.";
-      } else if (res.status === 403) {
-        message = "Acesso não autorizado.";
-      } else if (errorData?.message) {
-        message = errorData.message;
-      }
-    } catch (e) {
-      if (res.status === 403) message = "Acesso negado.";
-      else if (res.status === 401) message = "Token inválido ou expirado.";
-    }
-
-    throw new Error(message);
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || "Erro na requisição");
   }
 
   return await res.json();
