@@ -4,8 +4,7 @@ import AddTask from "./components/AddTask";
 import Tasks from "./components/Tasks";
 import Title from "./components/Title";
 import LogoutButton from "./components/LogoutButton";
-
-const API_URL = "https://apigerenciadordetarefas.brunoalves.dev.br/api/tasks";
+import { apiRequest } from "./services/api";
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -31,17 +30,12 @@ function App() {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await fetch(API_URL, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
+      const data = await apiRequest("/tasks");
       setTasks(data.map(normalizeTask));
     } catch (err) {
-      console.error("Erro ao carregar tarefas", err);
+      console.error("Erro ao carregar tarefas", err.message);
+      alert(err.message);
+      navigate("/login");
     } finally {
       setLoading(false);
     }
@@ -50,24 +44,15 @@ function App() {
   async function onTaskClick(taskId) {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const task = tasks.find((t) => t.id === taskId);
-      const response = await fetch(`${API_URL}/${taskId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          is_completed: !task.isCompleted,
-        }),
+      const updated = await apiRequest(`/tasks/${taskId}`, "PATCH", {
+        is_completed: !task.isCompleted,
       });
-
-      const updated = await response.json();
       const normalized = normalizeTask(updated);
       setTasks((prev) => prev.map((t) => (t.id === taskId ? normalized : t)));
     } catch (err) {
-      console.error("Erro ao atualizar tarefa", err);
+      console.error("Erro ao atualizar tarefa", err.message);
+      alert(err.message);
     } finally {
       setLoading(false);
     }
@@ -76,17 +61,11 @@ function App() {
   async function onDeleteTaskClick(taskId) {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      await fetch(`${API_URL}/${taskId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      await apiRequest(`/tasks/${taskId}`, "DELETE");
       setTasks((prev) => prev.filter((task) => task.id !== taskId));
     } catch (err) {
-      console.error("Erro ao deletar tarefa", err);
+      console.error("Erro ao deletar tarefa", err.message);
+      alert(err.message);
     } finally {
       setLoading(false);
     }
@@ -95,21 +74,15 @@ function App() {
   async function onAddTaskSubmit(title, description) {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ title, description }),
+      const newTask = await apiRequest("/tasks", "POST", {
+        title,
+        description,
       });
-
-      const newTask = await response.json();
       const normalized = normalizeTask(newTask);
       setTasks((prev) => [...prev, normalized]);
     } catch (err) {
-      console.error("Erro ao adicionar tarefa", err);
+      console.error("Erro ao adicionar tarefa", err.message);
+      alert(err.message);
     } finally {
       setLoading(false);
     }
