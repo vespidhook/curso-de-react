@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AddTask from "./components/AddTask";
 import Tasks from "./components/Tasks";
 import Title from "./components/Title";
+import LogoutButton from "./components/LogoutButton";
 
 const API_URL = "https://apigerenciadordetarefas.brunoalves.dev.br/api/tasks";
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   function normalizeTask(task) {
     return {
@@ -17,13 +20,24 @@ function App() {
   }
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
     fetchTasks();
   }, []);
 
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const response = await fetch(API_URL);
+      const token = localStorage.getItem("token");
+      const response = await fetch(API_URL, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       const data = await response.json();
       setTasks(data.map(normalizeTask));
     } catch (err) {
@@ -36,10 +50,14 @@ function App() {
   async function onTaskClick(taskId) {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       const task = tasks.find((t) => t.id === taskId);
       const response = await fetch(`${API_URL}/${taskId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           is_completed: !task.isCompleted,
         }),
@@ -47,7 +65,6 @@ function App() {
 
       const updated = await response.json();
       const normalized = normalizeTask(updated);
-
       setTasks((prev) => prev.map((t) => (t.id === taskId ? normalized : t)));
     } catch (err) {
       console.error("Erro ao atualizar tarefa", err);
@@ -59,8 +76,12 @@ function App() {
   async function onDeleteTaskClick(taskId) {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       await fetch(`${API_URL}/${taskId}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       setTasks((prev) => prev.filter((task) => task.id !== taskId));
@@ -74,9 +95,13 @@ function App() {
   async function onAddTaskSubmit(title, description) {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ title, description }),
       });
 
@@ -94,6 +119,9 @@ function App() {
     <div className="w-screen h-screen bg-slate-500 flex justify-center p-6">
       <div className="w-[500px] space-y-4">
         <Title>Gerenciador de Tarefas</Title>
+        <div className="flex justify-end">
+          <LogoutButton />
+        </div>
         <AddTask onAddTaskSubmit={onAddTaskSubmit} />
 
         {loading ? (
