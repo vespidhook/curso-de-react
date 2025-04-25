@@ -18,7 +18,7 @@ function TaskPage() {
         setTask(data);
       } catch (err) {
         console.error("Erro ao carregar tarefa:", err.message);
-        alert(err.message); // mostra o erro mais claro
+        alert(err.message); // Isso mostra "Acesso não autorizado." no navegador
         navigate("/");
       }
     };
