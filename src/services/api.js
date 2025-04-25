@@ -7,7 +7,7 @@ export async function apiRequest(endpoint, method = "GET", body = null) {
     method,
     headers: {
       "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : undefined,
+      Authorization: `Bearer ${token}`,
     },
     body: body ? JSON.stringify(body) : null,
   });
