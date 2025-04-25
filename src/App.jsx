@@ -25,7 +25,7 @@ function App() {
       return;
     }
     fetchTasks();
-  }, []);
+  }, [navigate]);
 
   const fetchTasks = async () => {
     try {
@@ -33,9 +33,7 @@ function App() {
       const data = await apiRequest("/tasks");
       setTasks(data.map(normalizeTask));
     } catch (err) {
-      console.error("Erro ao carregar tarefas", err.message);
-      alert(err.message);
-      navigate("/login");
+      console.error("Erro ao carregar tarefas", err);
     } finally {
       setLoading(false);
     }
@@ -51,8 +49,7 @@ function App() {
       const normalized = normalizeTask(updated);
       setTasks((prev) => prev.map((t) => (t.id === taskId ? normalized : t)));
     } catch (err) {
-      console.error("Erro ao atualizar tarefa", err.message);
-      alert(err.message);
+      console.error("Erro ao atualizar tarefa", err);
     } finally {
       setLoading(false);
     }
@@ -64,8 +61,7 @@ function App() {
       await apiRequest(`/tasks/${taskId}`, "DELETE");
       setTasks((prev) => prev.filter((task) => task.id !== taskId));
     } catch (err) {
-      console.error("Erro ao deletar tarefa", err.message);
-      alert(err.message);
+      console.error("Erro ao deletar tarefa", err);
     } finally {
       setLoading(false);
     }
@@ -81,8 +77,7 @@ function App() {
       const normalized = normalizeTask(newTask);
       setTasks((prev) => [...prev, normalized]);
     } catch (err) {
-      console.error("Erro ao adicionar tarefa", err.message);
-      alert(err.message);
+      console.error("Erro ao adicionar tarefa", err);
     } finally {
       setLoading(false);
     }

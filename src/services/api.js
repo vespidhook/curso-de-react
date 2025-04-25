@@ -17,5 +17,8 @@ export async function apiRequest(endpoint, method = "GET", body = null) {
     throw new Error(errorData.message || "Erro na requisição");
   }
 
+  // Caso a resposta não tenha corpo (ex: 204 No Content)
+  if (res.status === 204) return null;
+
   return await res.json();
 }
