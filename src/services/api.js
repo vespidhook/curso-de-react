@@ -13,17 +13,8 @@ export async function apiRequest(endpoint, method = "GET", body = null) {
   });
 
   if (!res.ok) {
-    // Tenta extrair a mensagem do erro da resposta (se existir)
-    let message = "Erro na requisição";
-    try {
-      const data = await res.json();
-      if (data.message) message = data.message;
-    } catch (e) {
-      // ignora se não conseguir fazer parsing
-    }
-
-    console.error(`[API] ${method} ${endpoint} =>`, message);
-    throw new Error(message);
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || "Erro na requisição");
   }
 
   return await res.json();
