@@ -9,10 +9,10 @@ function LogoutButton() {
       await apiRequest("/logout", "POST");
     } catch (err) {
       console.error("Erro ao fazer logout:", err.message);
+    } finally {
+      localStorage.clear(); // <-- limpa tudo para evitar resquícios
+      navigate("/login");
     }
-
-    localStorage.removeItem("token");
-    navigate("/login");
   }
 
   return (
