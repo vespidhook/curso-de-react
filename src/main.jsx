@@ -13,7 +13,7 @@ const router = createBrowserRouter([
     element: <App />,
   },
   {
-    path: "/task/:id", // <- rota com parâmetro de ID
+    path: "/task/:id", // <--- aqui
     element: <TaskPage />,
   },
   {
@@ -34,9 +34,3 @@ const router = createBrowserRouter([
     ),
   },
 ]);
-
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>
-);
